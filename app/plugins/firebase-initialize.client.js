@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need]
 import { initializeApp } from "firebase/app";
 // import { getVertexAI, getGenerativeModel, Schema } from "firebase/vertexai";
+import { getFirestore } from 'firebase/firestore'
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 export default defineNuxtPlugin((nuxtApp) => {
 
@@ -17,16 +18,19 @@ export default defineNuxtPlugin((nuxtApp) => {
   };
 
   // Initialize Firebase or get existing app
-  const firebaseApp = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
 
 
   // Initialize Firebase Authentication and get a reference to the service
-  const auth = getAuth(firebaseApp);
+  const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   // Set the language code to Japanese
   auth.languageCode = 'ja';
   // Add the Google provider to the auth instance
   auth.useDeviceLanguage();
+
+  // DB
+  const db = getFirestore(app);
 
 
   // Vertex AI service　を初期化
@@ -69,7 +73,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   return {
     provide: {
-      firebase: { auth },
+      firebase: { 
+        auth, 
+        db 
+      },
     },
   };
 })
