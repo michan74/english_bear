@@ -34,6 +34,9 @@
     <v-btn color="secondary" class="mt-4" to="/wordbook" tag="NuxtLink">
       単語帳へ
     </v-btn>
+    <v-btn color="secondary" class="mt-4" to="/flashcard" tag="NuxtLink">
+      フラッシュカードへ
+    </v-btn>
   </v-container>
 </template>
 

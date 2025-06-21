@@ -7,7 +7,10 @@
       flat
     >
       <v-app-bar-title>
-        Bear English
+        <NuxtLink to="/" class="text-white" style="text-decoration: none;">
+          <v-icon left>mdi-bear</v-icon>
+          Bear English
+        </NuxtLink>
       </v-app-bar-title>
 
       <LoginButton />
