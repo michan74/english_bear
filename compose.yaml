@@ -1,0 +1,17 @@
+services:
+  nuxt:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ./app:/app
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    tty: true
+#     networks:
+#       - cinnamon-network
+
+# networks:
+#   cinnamon-network:
+#     name: cinnamon-network
