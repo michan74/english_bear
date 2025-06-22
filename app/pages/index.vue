@@ -1,77 +1,49 @@
 <template>
   <v-container class="pa-4" max-width="500">
-    <v-card>
-      <v-card-title>単語登録</v-card-title>
-      <v-card-text>
-        <v-form @submit.prevent="submit">
-          <v-text-field
-            v-model="word"
-            label="単語"
-            required
-          />
-          <v-text-field
-            v-model="meaning"
-            label="意味"
-            required
-          />
-          <v-textarea
-            v-model="example"
-            label="例文"
-            rows="3"
-            auto-grow
-          />
-          <v-btn
-            type="submit"
-            color="primary"
-            class="mt-4"
-            :loading="loading"
-          >
-            登録する
-          </v-btn>
-        </v-form>
-      </v-card-text>
-    </v-card>
-    <v-btn color="secondary" class="mt-4" to="/wordbook" tag="NuxtLink">
-      単語帳へ
-    </v-btn>
-    <v-btn color="secondary" class="mt-4" to="/flashcard" tag="NuxtLink">
-      フラッシュカードへ
-    </v-btn>
+    <h1>メニュー</h1>
+    <div class="menu-grid">
+      <NuxtLink to="/word-register" class="menu-card">単語登録</NuxtLink>
+      <NuxtLink to="/wordbook" class="menu-card">単語帳</NuxtLink>
+      <NuxtLink to="/flashcard" class="menu-card">フラッシュカード</NuxtLink>
+      <NuxtLink to="/settings" class="menu-card">設定</NuxtLink>
+    </div>
   </v-container>
 </template>
 
 <script>
-import { useWords } from '~/composables/useWords'
-
 export default {
-  name: 'WordForm',
-  data() {
-    return {
-      word: '',
-      meaning: '',
-      example: '',
-      loading: false,
-    }
-  },
-  methods: {
-    async submit() {
-      const { addWord } = useWords()
-      this.loading = true
-      try {
-        await addWord(this.word, this.meaning, this.example)
-        this.word = ''
-        this.meaning = ''
-        this.example = ''
-        // TODO: スクロール
-        // useGoTo(0);
-        alert('登録しました')
-      } catch (e) {
-        console.error(e)
-        alert('登録に失敗しました')
-      } finally {
-        this.loading = false
-      }
-    },
-  },
+  name: 'MenuPage',
 }
 </script>
+
+<style scoped>
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.menu-card {
+  background: #f7e08c; /* コダックの体色に近いクリームイエロー */
+  color: #222;
+  border-radius: 18px;
+  padding: 2.5rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(247,224,140,0.15);
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  border: 2px solid #bfa76a; /* 影やライン用のブラウン */
+}
+.menu-card:hover {
+  background: #fffbe7; /* さらに淡いクリーム色 */
+  color: #bfa76a;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(191,167,106,0.18);
+}
+</style>

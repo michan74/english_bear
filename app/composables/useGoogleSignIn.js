@@ -44,6 +44,7 @@ export function logOut() {
   signOut($firebase.auth).then(() => {
     // Sign-out successful.
     console.log("Sign-out successful.");
+    navigateTo('/login'); // Redirect to login page after sign-out
   }).catch((error) => {
     // An error happened.
     console.error("Sign-out error:", error);
