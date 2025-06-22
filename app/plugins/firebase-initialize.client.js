@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need]
 import { initializeApp } from "firebase/app";
-// import { getVertexAI, getGenerativeModel, Schema } from "firebase/vertexai";
+import { getAI } from "firebase/vertexai";
 import { getFirestore } from 'firebase/firestore'
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 export default defineNuxtPlugin((nuxtApp) => {
@@ -31,7 +31,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // DB
   const db = getFirestore(app);
-
 
   // Vertex AI service　を初期化
   // const vertexAI = getVertexAI(firebaseApp);
@@ -75,7 +74,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     provide: {
       firebase: { 
         auth, 
-        db 
+        db,
       },
     },
   };

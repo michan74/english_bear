@@ -1,14 +1,25 @@
 <template>
   <div class="word-register-page">
     <h2>Word Registration</h2>
-    <form class="word-form" @submit.prevent="submit">
+    <form class="word-form" @submit.prevent="generateWordCard">
+      <!-- 英単語入力 -->
       <v-text-field
         v-model="word"
         label="Word"
         required
         class="form-field"
       />
-      <v-text-field
+
+      <!-- 作成ボタン -->
+      <v-btn
+        type="submit"
+        color="primary"
+        class="form-field"
+      >
+        Generate!!
+      </v-btn>
+
+      <!-- <v-text-field
         v-model="meaning"
         label="Meaning"
         required
@@ -20,7 +31,7 @@
         rows="3"
         auto-grow
         class="form-field"
-      />
+      /> -->
       <input type="file" accept="image/*" @change="onFileChange" class="form-field" />
       <div class="form-actions">
         <v-btn
@@ -51,6 +62,16 @@ export default {
     }
   },
   methods: {
+    async generateWordCard() {
+      // ここに単語カード生成のロジックを追加
+      // 例えば、単語と意味を使ってカードを生成するなど
+      console.log(`Generating card for: ${this.word} - ${this.meaning}`)
+      const response = await generatePrompt(this.word);
+      console.log('-------------------');
+      console.log(`app/pages/word-register.vue: 71`);
+      console.log(`word: ${this.word}`);
+      console.log(`response: ${response}`);
+    },
     onFileChange(e) {
       this.imageFile = e.target.files[0] || null
     },

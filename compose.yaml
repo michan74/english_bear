@@ -9,6 +9,13 @@ services:
     ports:
       - "3000:3000"
     tty: true
+  function:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ./function:/app
+    tty: true
 #     networks:
 #       - cinnamon-network
 

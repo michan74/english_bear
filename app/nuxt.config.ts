@@ -12,6 +12,7 @@ export default defineNuxtConfig({
       storageBucket: process.env.STORAGE_BUCKET,
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
+      cloudFunctionUrl: process.env.CLOUD_FUNCTION_URL, // Cloud FunctionのURLを環境変数から取得
     },
   },
   build: {
