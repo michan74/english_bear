@@ -10,7 +10,7 @@
       </v-btn>
     </div>
     <div v-else>
-      <v-avatar v-if="user.photoURL" class="pr-4">
+      <v-avatar v-if="user.photoURL" class="mr-4">
         <v-img
         :alt="user.displayName"
         :src="user.photoURL"
