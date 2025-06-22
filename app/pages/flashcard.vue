@@ -7,9 +7,10 @@
         @click="toggleCard"
       >
         <div class="front">
-          <h2>{{ currentWord.word }}</h2>
+          <img :src="currentWord.imageUrl" alt="word image" class="flashcard-image" />
         </div>
         <div class="back">
+          <h2>{{ currentWord.word }}</h2>
           <h3>{{ currentWord.meaning }}</h3>
           <p>{{ currentWord.example }}</p>
         </div>
@@ -104,5 +105,10 @@ export default {
 }
 .flashcard .back {
   transform: rotateY(180deg);
+}
+.flashcard-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 </style>
