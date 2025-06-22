@@ -23,6 +23,8 @@ export async function signInWithGoogle() {
       const user = result.user;
       console.log("Google Sign-In successful:", user);
       
+      navigateTo('/'); // Redirect to home page after successful sign-in
+
       return { user, token };
     } catch (error) {
       const errorCode = error.code;

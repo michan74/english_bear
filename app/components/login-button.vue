@@ -3,14 +3,14 @@
     <div v-if="!user">
       <v-btn
         class="login-button"
-        color="primary"
+        color="black"
         @click="signInWithGoogle"
       >
         Log in
       </v-btn>
     </div>
     <div v-else>
-      <v-avatar>
+      <v-avatar v-if="user.photoURL" class="pr-4">
         <v-img
         :alt="user.displayName"
         :src="user.photoURL"
@@ -22,8 +22,11 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          </v-img>
-        </v-avatar>
+        </v-img>
+      </v-avatar>
+      <v-avatar v-else>
+        <v-icon icon="mdi-account-circle"></v-icon>
+      </v-avatar>
     </div>
   </div>
 </template>

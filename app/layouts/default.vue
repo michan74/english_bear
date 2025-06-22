@@ -7,7 +7,7 @@
       flat
     >
       <v-app-bar-title>
-        <NuxtLink to="/" class="text-white" style="text-decoration: none;">
+        <NuxtLink to="/" class="text-black" style="text-decoration: none;">
           <v-icon left>mdi-bear</v-icon>
           Bear English
         </NuxtLink>
