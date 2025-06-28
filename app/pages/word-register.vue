@@ -70,6 +70,7 @@
           color="primary"
           class="form-field"
           :loading="generating"
+          variant="flat"
           block
         >
           <v-icon left>mdi-auto-fix</v-icon>
@@ -148,27 +149,28 @@
         </v-card>
 
         <!-- Action Buttons -->
-        <div class="d-flex flex-column gap-2">
+        <div class="d-flex flex-column">
           <v-btn
             color="primary"
             :loading="loading"
             @click="submit"
             block
-            class="primary-button"
+            variant="flat"
+            class="primary-button mb-6"
           >
             <v-icon left>mdi-content-save</v-icon>
             Save Card
           </v-btn>
 
           <v-btn
-            color="secondary"
+            color="blue-lighten-4"
             @click="resetForm"
             block
-            variant="tonal"
+            variant="flat"
             class="retry-button"
           >
-            <v-icon left>mdi-refresh</v-icon>
-            Generate Another
+            <v-icon left class="text-blue-darken-1">mdi-refresh</v-icon>
+            <span class="text-blue-darken-1">Generate Another</span>
           </v-btn>
         </div>
       </div>
@@ -426,11 +428,11 @@ h2 {
   }
   
   &.retry-button {
-    background-color: rgb(var(--v-theme-secondary)) !important;
-    color: rgba(var(--v-theme-on-surface), 0.9) !important;
     font-weight: 500 !important;
+    margin-bottom: 8px;
     
     &:hover {
+      background-color: rgb(var(--v-theme-blue-lighten-3)) !important;
       opacity: 0.95;
     }
   }
