@@ -50,7 +50,7 @@
       </template>
     </v-snackbar>
 
-    <div class="page-header text-center mb-6">
+    <div class="page-header text-center mb-6 mt-15">
       <h2>Add Card</h2>
       <p class="text-subtitle-1 text-medium-emphasis">Create a new flashcard with AI-powered visuals</p>
     </div>
@@ -234,26 +234,24 @@ export default {
         }
         
         // OpenAIで画像生成
-        // if (data.image_prompt) {
-        //   console.log("Generating image with OpenAI, prompt:", data.image_prompt);
-        //   // const imageUrl = await useImageGenerateWithOpenAI(data.image_prompt);
-        //   // TODO: dummy
-        //   const imageUrl = "https://placehold.jp/1024x1024.png"; // Placeholder for actual image URL
-        //   console.log("Generated image URL:", imageUrl);
+        if (data.image_prompt) {
+          console.log("Generating image with OpenAI, prompt:", data.image_prompt);
+          const imageUrl = await useImageGenerateWithOpenAI(data.image_prompt);
+          console.log("Generated image URL:", imageUrl);
           
-        //   if (imageUrl) {
-        //     this.generatedImageUrl = imageUrl;
+          if (imageUrl) {
+            this.generatedImageUrl = imageUrl;
             
-        //     // 画像URLからBlobを作成
-        //     const imageResponse = await fetch(imageUrl);
-        //     const imageBlob = await imageResponse.blob();
-        //     this.imageFile = new File([imageBlob], `${this.word}_ai_generated.png`, {
-        //       type: "image/png"
-        //     });
-        //   }
-        // } else {
-        //   throw new Error("No image prompt received");
-        // }
+            // 画像URLからBlobを作成
+            const imageResponse = await fetch(imageUrl);
+            const imageBlob = await imageResponse.blob();
+            this.imageFile = new File([imageBlob], `${this.word}_ai_generated.png`, {
+              type: "image/png"
+            });
+          }
+        } else {
+          throw new Error("No image prompt received");
+        }
 
         // 音声の生成
         console.log("Generating audio for word:", this.word);
@@ -269,47 +267,60 @@ export default {
     async submit() {
       this.loading = true;
       try {
-        // ユーザーIDの取得
         const { $firebase } = useNuxtApp();
-        const user = $firebase.auth.currentUser
+        const user = $firebase.auth.currentUser;
         console.log("Current user:", user);
         if (!user) {
           throw new Error('Please login first! 🐾');
         }
 
-        // Firebase Storageに画像をアップロード
+        const storage = getStorage();
+        const userId = user.uid;
+        const timestamp = Date.now();
+        let imageUrl = null;
+        let audioUrl = null;
+
+        // 画像の保存
         if (this.imageFile) {
-          const storage = getStorage();
-          const userId = user.uid;
-          // ユーザーごとのパスに画像を保存
           const imageRef = storageRef(
             storage, 
-            `users/${userId}/words/${this.word}_${Date.now()}.webp`
+            `users/${userId}/words/${this.word}_${timestamp}.webp`
           );
-          
           await uploadBytes(imageRef, this.imageFile);
-          const imageUrl = await getDownloadURL(imageRef);
-          
-          // 単語と意味をFirestoreに登録
-          const { addWord } = useWords();
-          await addWord(this.word, this.meaning, imageUrl);
-          
-          // 成功したらフォームをクリア
-          this.word = "";
-          this.meaning = "";
-          this.imageFile = null;
-          this.generatedImageUrl = null;
-          
-          this.showSuccess('Card saved successfully!');
+          imageUrl = await getDownloadURL(imageRef);
         } else {
-          this.showError('Please generate an image first!');
+          throw new Error('Please generate an image first!');
         }
+
+        // 音声の保存
+        if (this.audioFile) {
+          const audioRef = storageRef(
+            storage,
+            `users/${userId}/words/${this.word}_${timestamp}.mp3`
+          );
+          await uploadBytes(audioRef, this.audioFile);
+          audioUrl = await getDownloadURL(audioRef);
+        }
+
+        // FirestoreにURLを保存
+        const { addWord } = useWords();
+        await addWord(this.word, this.meaning, imageUrl, audioUrl);
+
+        // 成功したらフォームをクリア
+        this.word = "";
+        this.meaning = "";
+        this.imageFile = null;
+        this.generatedImageUrl = null;
+        this.audioFile = null;
+        this.audioUrl = null;
+
+        this.showSuccess('Card saved successfully!');
       } catch (error) {
         console.error('Error during registration:', error);
         if (error.message.includes('login')) {
           this.showError('Please login to save cards! ');
         } else {
-          this.showError('Failed to save card. Please try again! ');
+          this.showError(error.message || 'Failed to save card. Please try again! ');
         }
       } finally {
         this.loading = false;
