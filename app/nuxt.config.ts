@@ -13,6 +13,10 @@ export default defineNuxtConfig({
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       cloudFunctionUrl: process.env.CLOUD_FUNCTION_URL, // Cloud FunctionのURLを環境変数から取得
+      // Firebase Emulator用のURL
+      cloudFunctionPromptUrl: process.env.CLOUD_FUNCTION_PROMPT_URL,
+      cloudFunctionImageUrl: process.env.CLOUD_FUNCTION_IMAGE_URL,
+      cloudFunctionImageWithOpenAIUrl: process.env.CLOUD_FUNCTION_IMAGE_WITH_OPENAI_URL,
     },
   },
   build: {

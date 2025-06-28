@@ -10,18 +10,36 @@
 const {setGlobalOptions} = require("firebase-functions");
 const {onRequest} = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
+const express = require("express");
+const cors = require("cors");
+const fetch = require("node-fetch");
+const {VertexAI} = require("@google-cloud/vertexai");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
+// CORS用のミドルウェアを作成
+const corsHandler = cors({
+  origin: true, // 開発中は全てのオリジンを許可
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+});
+
+// Express setup
+const app = express();
+app.use(cors({origin: "http://localhost:3000"}));
+app.use(express.json());
+
+// Cloud Function settings
 setGlobalOptions({maxInstances: 10});
+
+// Vertex AI settings
+const location = "us-central1";
+const project = process.env.GCLOUD_PROJECT;
+const vertexAI = new VertexAI({project: project, location: location});
+
+// OpenAI API settings
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_ORG_ID = "org-PMJ7FOFevvGd80AIpyC8W0Dz";
+const OPENAI_API_URL = "https://api.openai.com/v1/images/generations";
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -31,107 +49,75 @@ setGlobalOptions({maxInstances: 10});
 //   response.send("Hello from Firebase!");
 // });
 
-const {VertexAI} = require("@google-cloud/vertexai");
+exports.generatePrompt = onRequest((request, response) => {
+  return corsHandler(request, response, async () => {
+    try {
+      logger.info("プロンプト生成！");
+      const word = request.query.word || "bear";
 
-// Location: e.g., us-central1
-const location = "us-central1";
-const project = process.env.GCLOUD_PROJECT;
+      // テスト用の固定レスポンス
+      const mockResponse = {
+        simple_definition: `A ${word} is a common word that everyone knows!`,
+        image_prompt: "A cute cartoon character sitting in a sunny garden with flowers and butterflies",
+      };
 
-const vertexAI = new VertexAI({project: project, location: location});
-
-
-exports.generatePrompt = onRequest(async (request, response) => {
-  logger.info("プロンプト生成！");
-  // CORSの設定
-  // 開発環境の場合、localhost:3000を許可
-  // 本番環境にデプロイする際は、あなたのフロントエンドのドメインに置き換えるか、
-  // 複数のドメインを許可する場合は、リクエストのOriginヘッダーをチェックして動的に設定するなどの考慮が必要です。
-  response.set("Access-Control-Allow-Origin", "http://localhost:3000");
-  response.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  response.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  // プリフライトリクエスト (OPTIONSメソッド) に対応
-  if (request.method === "OPTIONS") {
-    response.status(204).send("");
-    return;
-  }
-
-  const word = request.query.word || "bear";
-
-  const prompt = `I want to create an illustration to help someone
-    understand the English word ${word}. Please write a short visual 
-    description of a scene that clearly shows what the word means, 
-    using simple language and a charming tone.
-    The scene should include a bear interacting naturally with 
-    the object or concept. Avoid including any text, just describe 
-    what should be visible in the image.`;
-
-  try {
-    const gemini = vertexAI.getGenerativeModel({
-      model: "gemini-2.0-flash", // または gemini-1.0-pro 等
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-      safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
-    });
-
-    const result = await gemini.generateContent({
-      contents: [{role: "user", parts: [{text: prompt}]}],
-    });
-
-    const generatedText = result.response.candidates[0].content.parts[0].text;
-
-    // 成功した場合はJSON形式でレスポンスを返す
-    response.status(200).json({prompt: generatedText});
-  } catch (error) {
-    logger.error("Error generating content:", error, {structuredData: true});
-    // エラーが発生した場合はエラーレスポンスを返す
-    response.status(500).json({error: error});
-  }
+      response.status(200).json(mockResponse);
+    } catch (error) {
+      logger.error("Error in generatePrompt:", error);
+      response.status(500).json({
+        error: error.message || "Failed to generate prompt",
+        details: error,
+      });
+    }
+  });
 });
 
+// 画像生成API
+exports.generateImageWithOpenAI = onRequest((request, response) => {
+  return corsHandler(request, response, async () => {
+    try {
+      logger.info("OpenAI画像生成開始！");
+      const prompt = request.body && request.body.prompt;
+      
+      if (!prompt) {
+        throw new Error("Prompt is required");
+      }
 
-exports.generateImage = onRequest(async (request, response) => {
-  logger.info("画像生成！");
-  // CORSの設定
-  // 開発環境の場合、localhost:3000を許可
-  // 本番環境にデプロイする際は、あなたのフロントエンドのドメインに置き換えるか、
-  // 複数のドメインを許可する場合は、リクエストのOriginヘッダーをチェックして動的に設定するなどの考慮が必要です。
-  response.set("Access-Control-Allow-Origin", "http://localhost:3000");
-  response.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  response.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      const openAIResponse = await fetch(OPENAI_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "OpenAI-Organization": OPENAI_ORG_ID,
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          response_format: "b64_json",
+          // model: "gpt-image-1",
+          model: "dall-e-3",
+        }),
+      });
 
-  // プリフライトリクエスト (OPTIONSメソッド) に対応
-  if (request.method === "OPTIONS") {
-    response.status(204).send("");
-    return;
-  }
+      if (!openAIResponse.ok) {
+        const errorData = await openAIResponse.json();
+        throw new Error(errorData.error?.message || "Failed to generate image");
+      }
 
-  // promptはクエリまたはPOSTボディから取得
-  const prompt = request.query.prompt || (request.body && request.body.prompt);
-  if (!prompt) {
-    response.status(400).json({error: "Prompt is required."});
-    return;
-  }
-  try {
-    const imagen = vertexAI.getGenerativeModel({
-      model: "imagen-3.0-generate-002",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-      safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
-    });
-    const image = await imagen.generateContent({
-      contents: [{role: "user", parts: [{text: prompt}]}],
-    });
-    response.status(200).json({image});
-  } catch (error) {
-    response.status(500).json({error: error});
-  }
+      const data = await openAIResponse.json();
+      logger.info("Image generated successfully");
+      
+      response.status(200).json({
+        image: `data:image/webp;base64,${data.data[0].b64_json}`,
+        revised_prompt: data.data[0].revised_prompt,
+      });
+    } catch (error) {
+      logger.error("Error generating image:", error);
+      response.status(500).json({
+        error: error.message || "Failed to generate image",
+        details: error,
+      });
+    }
+  });
 });
