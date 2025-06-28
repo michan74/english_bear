@@ -3,7 +3,7 @@ import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore
 
 export const useWords = () => {
   const { $firebase } = useNuxtApp();
-  const addWord = async (word: string, meaning: string, example: string, imageUrl: string = '') => {
+  const addWord = async (word: string, meaning: string, imageUrl: string = '') => {
     const user = $firebase.auth.currentUser
     if (!user) throw new Error('ログインしていません')
 
@@ -12,7 +12,6 @@ export const useWords = () => {
     await addDoc(collection($firebase.db, `users/${uid}/words`), {
       word,
       meaning,
-      example,
       imageUrl, // 画像URLを追加
       createdAt: serverTimestamp()
     })

@@ -1,31 +1,43 @@
 <template>
-  <v-container class="py-8" max-width="600" v-if="words.length > 0">
-    <div class="flashcard-wrapper">
-      <div
-        class="flashcard"
-        :class="{ flipped: showBack }"
-        @click="toggleCard"
-      >
-        <div class="front">
-          <img :src="currentWord.imageUrl" alt="word image" class="flashcard-image" />
-        </div>
-        <div class="back">
-          <h2>{{ currentWord.word }}</h2>
-          <h3>{{ currentWord.meaning }}</h3>
-          <p>{{ currentWord.example }}</p>
+  <div class="flashcard-page">
+    <v-container class="py-8" max-width="600" v-if="words.length > 0">
+      <div class="flashcard-wrapper">
+        <div
+          class="flashcard"
+          :class="{ flipped: showBack }"
+          @click="toggleCard"
+        >
+          <div class="front">
+            <img :src="currentWord.imageUrl" alt="word image" class="flashcard-image" />
+          </div>
+          <div class="back">
+            <h2>{{ currentWord.word }}</h2>
+            <h3>{{ currentWord.meaning }}</h3>
+            <p>{{ currentWord.example }}</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <v-row class="mt-6" justify="center">
-      <v-btn color="primary" @click="prevCard" :disabled="currentIndex === 0">← 前へ</v-btn>
-      <v-btn class="ml-4" color="primary" @click="nextCard" :disabled="currentIndex === words.length - 1">次へ →</v-btn>
-    </v-row>
-  </v-container>
+      <v-row class="mt-6" justify="center">
+        <v-btn color="primary" @click="prevCard" :disabled="currentIndex === 0">← 前へ</v-btn>
+        <v-btn class="ml-4" color="primary" @click="nextCard" :disabled="currentIndex === words.length - 1">次へ →</v-btn>
+      </v-row>
+    </v-container>
 
-  <v-container v-else class="text-center py-12">
-    <v-alert type="info">単語帳が空です。先に単語を登録してください。</v-alert>
-  </v-container>
+    <v-container v-else class="text-center py-12">
+      <v-alert
+        type="info"
+        color="blue-lighten-4"
+        class="empty-alert"
+        icon="mdi-information"
+      >
+        <div class="text-body-1">
+          <div class="english-text">Your flashcard deck is empty!</div>
+          <div class="hint-text">Let's add some new words to study together!</div>
+        </div>
+      </v-alert>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -69,6 +81,28 @@ export default {
 </script>
 
 <style scoped>
+.flashcard-page {
+  margin-top: 80px;
+}
+
+.empty-alert {
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 12px;
+  opacity: 0.9;
+}
+
+.english-text {
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.hint-text {
+  font-size: 0.9em;
+  color: #666;
+}
+
 .flashcard-wrapper {
   perspective: 1000px;
   display: flex;
