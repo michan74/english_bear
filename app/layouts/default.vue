@@ -1,17 +1,8 @@
 <template>
   <v-app>
-    <!-- header -->
-    <v-app-bar
-      density="compact"
-      flat
-      class="header-custom"
-    >
-      <template v-slot:append>
-        <div class="d-flex align-center">
-          <LoginButton />
-        </div>
-      </template>
-    </v-app-bar>
+    <div class="login-button-wrapper">
+      <LoginButton />
+    </div>
     
     <v-main class="pa-0" style="overflow:auto; min-height:0;">
       <NuxtPage />
@@ -93,5 +84,12 @@ html, body, #__nuxt, #app {
 .v-btn--active .v-icon {
   transform: scale(1.1);
   opacity: 1;
+}
+
+.login-button-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
 }
 </style>

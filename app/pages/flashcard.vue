@@ -1,16 +1,110 @@
 <template>
   <div class="flashcard-page">
     <v-container class="py-8" max-width="600" v-if="words.length > 0">
+      <v-switch
+        v-model="isTestMode"
+        color="primary"
+        hide-details
+        inset
+        density="compact"
+      >
+        <template v-slot:label>
+          <div class="d-flex align-center">
+            <v-icon :color="isTestMode ? 'primary' : 'grey'" class="mr-2" size="18">
+              {{ isTestMode ? 'mdi-school' : 'mdi-book-open-variant' }}
+            </v-icon>
+            <span class="mode-label">{{ isTestMode ? 'Test Mode' : 'Study Mode' }}</span>
+          </div>
+        </template>
+      </v-switch>
+
       <div class="flashcard-container">
         <!-- フラッシュカード -->
         <div class="flashcard-wrapper">
           <div
             class="flashcard"
-            :class="{ flipped: showBack }"
-            @click="toggleCard"
           >
             <div class="front">
-              <div class="word-header">
+              <!-- 学習モード -->
+              <template v-if="!isTestMode">
+                <div class="word-header">
+                  <h1 class="word-text">{{ currentWord.word }}</h1>
+                  <button 
+                    class="phonetic-button" 
+                    @click.stop="playAudio(currentWord.audioUrl)"
+                    :disabled="!currentWord.audioUrl"
+                  >
+                    <v-icon class="audio-icon" size="16">mdi-volume-high</v-icon>
+                  </button>
+                </div>
+                <div class="image-container">
+                  <v-img
+                    :src="currentWord.imageUrl"
+                    :alt="currentWord.word"
+                    class="flashcard-image"
+                    cover
+                  >
+                    <template v-slot:placeholder>
+                      <div class="image-loading">
+                        <v-progress-circular
+                          indeterminate
+                          color="primary"
+                          size="32"
+                        ></v-progress-circular>
+                        <div class="loading-text">Loading image...</div>
+                      </div>
+                    </template>
+                  </v-img>
+                </div>
+                <div class="word-meaning">{{ currentWord.meaning }}</div>
+              </template>
+
+              <!-- テストモード -->
+              <template v-else>
+                <div 
+                  class="word-header"
+                  @click.stop="handleCardClick"
+                  :style="{ cursor: 'pointer' }"
+                >
+                  <template v-if="!showBack">
+                    <h1 class="word-text">???</h1>
+                    <div class="test-badge">Guess the word!</div>
+                  </template>
+                  <template v-else>
+                    <h1 class="word-text">{{ currentWord.word }}</h1>
+                    <button 
+                      class="phonetic-button" 
+                      @click.stop="playAudio(currentWord.audioUrl)"
+                      :disabled="!currentWord.audioUrl"
+                    >
+                      <v-icon class="audio-icon" size="16">mdi-volume-high</v-icon>
+                    </button>
+                  </template>
+                </div>
+                <div class="image-container">
+                  <v-img
+                    :src="currentWord.imageUrl"
+                    :alt="currentWord.word"
+                    class="flashcard-image"
+                    cover
+                  >
+                    <template v-slot:placeholder>
+                      <div class="image-loading">
+                        <v-progress-circular
+                          indeterminate
+                          color="primary"
+                          size="32"
+                        ></v-progress-circular>
+                        <div class="loading-text">Loading image...</div>
+                      </div>
+                    </template>
+                  </v-img>
+                </div>
+                <div class="word-meaning">{{ currentWord.meaning }}</div>
+              </template>
+            </div>
+            <div class="back">
+              <div class="word-header" v-if="isTestMode">
                 <h1 class="word-text">{{ currentWord.word }}</h1>
                 <button 
                   class="phonetic-button" 
@@ -20,31 +114,25 @@
                   <v-icon class="audio-icon" size="16">mdi-volume-high</v-icon>
                 </button>
               </div>
-              <div class="image-container">
-                <v-img
-                  :src="currentWord.imageUrl"
-                  :alt="currentWord.word"
-                  class="flashcard-image"
-                  cover
-                >
-                  <template v-slot:placeholder>
-                    <div class="image-loading">
-                      <v-progress-circular
-                        indeterminate
-                        color="primary"
-                        size="32"
-                      ></v-progress-circular>
-                      <div class="loading-text">Loading image...</div>
-                    </div>
-                  </template>
-                </v-img>
+              <div class="content-wrapper">
+                <template v-if="!isTestMode">
+                  <h2>{{ currentWord.word }}</h2>
+                  <div class="meaning-detail">{{ currentWord.meaning }}</div>
+                </template>
+                <template v-else>
+                  <div class="meaning-detail">{{ currentWord.meaning }}</div>
+                  <v-btn
+                    class="mt-6"
+                    color="primary"
+                    variant="flat"
+                    @click.stop="playAudio(currentWord.audioUrl)"
+                    :disabled="!currentWord.audioUrl"
+                  >
+                    <v-icon left>mdi-volume-high</v-icon>
+                    Play Pronunciation
+                  </v-btn>
+                </template>
               </div>
-              <div class="word-meaning">{{ currentWord.meaning }}</div>
-            </div>
-            <div class="back">
-              <h2>{{ currentWord.word }}</h2>
-              <div class="meaning-detail">{{ currentWord.meaning }}</div>
-              <p class="example">{{ currentWord.example }}</p>
             </div>
           </div>
         </div>
@@ -105,6 +193,7 @@ export default {
       words: [],
       currentIndex: 0,
       showBack: false,
+      isTestMode: false,
     }
   },
   computed: {
@@ -117,6 +206,11 @@ export default {
     this.words = await getWords()
   },
   methods: {
+    handleCardClick() {
+      if (this.isTestMode) {
+        this.toggleCard();
+      }
+    },
     toggleCard() {
       this.showBack = !this.showBack
     },
@@ -144,9 +238,10 @@ export default {
 
 <style scoped>
 .flashcard-page {
-  margin-top: 80px;
+  padding-top: 50px;
   background-color: #f8f9fa;
   min-height: calc(100vh - 80px);
+  padding-left: 20px; /* スイッチ分のスペース確保 */
 }
 
 .empty-alert {
@@ -297,12 +392,41 @@ export default {
   text-align: center;
 }
 
+.word-header-wrapper {
+  position: relative;
+  perspective: 1000px;
+}
+
 .word-header {
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
   background-color: rgb(var(--v-theme-primary));
   color: white;
   padding: 32px;
   border-radius: 20px 20px 0 0;
   text-align: center;
+}
+
+.header-front,
+.header-back {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-back {
+  transform: rotateX(180deg);
+}
+
+.word-header.header-flipped {
+  transform: rotateX(180deg);
 }
 
 .word-text {
@@ -439,5 +563,42 @@ export default {
     background-color: #b2bec3 !important;
     opacity: 0.7;
   }
+}
+
+
+
+.mode-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.test-hint {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgb(var(--v-theme-grey-darken-1));
+  font-size: 0.9rem;
+}
+
+.content-wrapper {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.test-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 </style>

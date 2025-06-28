@@ -1,7 +1,7 @@
 <template>
   <div class="login-bg">
     <div class="login-box">
-      <h2>ログイン</h2>
+      <h2>Login</h2>
       <button class="gsi-material-button" @click="signInWithGoogle">
         <div class="gsi-material-button-state"></div>
         <div class="gsi-material-button-content-wrapper">
