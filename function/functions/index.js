@@ -60,11 +60,14 @@ exports.generatePrompt = onRequest(withCors(async (request, response) => {
     `Given a single English word, your task is to return a JSON object with two fields:`,
     // eslint-disable-next-line max-len
     `1. "simple_definition": Describe the word's meaning using simple English (easy enough for a 6-year-old to understand).`,
+    `Keep it within 10 words. Use as few words as possible.`,
     // eslint-disable-next-line max-len
     `2. "image_prompt": Describe a visual scene that could illustrate the meaning of the word. Be specific and concrete. Do not include the word itself in the description.`,
-    `Only return the JSON object. Do not include any extra explanation or text.`,
-    `Word: "${word}"`,
-  ].join(" ");
+    // eslint-disable-next-line max-len
+    `If the input is not a valid English word, or if it is a non-English word, a made-up word, or a phrase (more than one word), return an error message in JSON like:`,
+    `{"error": "Invalid input. Please enter a single valid English word."}`,
+    `Only return the JSON object. Do not include any explanation or formatting.`,
+    `Word: "${word}"`].join(" ");
   try {
     const gemini = vertexAI.getGenerativeModel({
       model: "gemini-2.0-flash",
