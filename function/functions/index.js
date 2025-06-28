@@ -39,18 +39,9 @@ const project = process.env.GCLOUD_PROJECT;
 
 const vertexAI = new VertexAI({project: project, location: location});
 
-const generativeModel = vertexAI.getGenerativeModel({
-  model: "gemini-2.0-flash", // または gemini-1.0-pro 等
-  generationConfig: {
-    temperature: 0.7,
-    topK: 40,
-    topP: 0.95,
-    maxOutputTokens: 1024,
-  },
-  safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
-});
 
-exports.generateImage = onRequest(async (request, response) => {
+exports.generatePrompt = onRequest(async (request, response) => {
+  logger.info("プロンプト生成！");
   // CORSの設定
   // 開発環境の場合、localhost:3000を許可
   // 本番環境にデプロイする際は、あなたのフロントエンドのドメインに置き換えるか、
@@ -76,18 +67,71 @@ exports.generateImage = onRequest(async (request, response) => {
     what should be visible in the image.`;
 
   try {
-    const result = await generativeModel.generateContent({
+    const gemini = vertexAI.getGenerativeModel({
+      model: "gemini-2.0-flash", // または gemini-1.0-pro 等
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      },
+      safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
+    });
+
+    const result = await gemini.generateContent({
       contents: [{role: "user", parts: [{text: prompt}]}],
     });
 
-    logger.info(result.response, {structuredData: true});
     const generatedText = result.response.candidates[0].content.parts[0].text;
 
     // 成功した場合はJSON形式でレスポンスを返す
-    response.status(200).json({text: generatedText}); // ここでjsonメソッドを使う
+    response.status(200).json({prompt: generatedText});
   } catch (error) {
     logger.error("Error generating content:", error, {structuredData: true});
     // エラーが発生した場合はエラーレスポンスを返す
-    response.status(500).json({error: "Failed to generate image description."});
+    response.status(500).json({error: error});
+  }
+});
+
+
+exports.generateImage = onRequest(async (request, response) => {
+  logger.info("画像生成！");
+  // CORSの設定
+  // 開発環境の場合、localhost:3000を許可
+  // 本番環境にデプロイする際は、あなたのフロントエンドのドメインに置き換えるか、
+  // 複数のドメインを許可する場合は、リクエストのOriginヘッダーをチェックして動的に設定するなどの考慮が必要です。
+  response.set("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // プリフライトリクエスト (OPTIONSメソッド) に対応
+  if (request.method === "OPTIONS") {
+    response.status(204).send("");
+    return;
+  }
+
+  // promptはクエリまたはPOSTボディから取得
+  const prompt = request.query.prompt || (request.body && request.body.prompt);
+  if (!prompt) {
+    response.status(400).json({error: "Prompt is required."});
+    return;
+  }
+  try {
+    const imagen = vertexAI.getGenerativeModel({
+      model: "imagen-3.0-generate-002",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      },
+      safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
+    });
+    const image = await imagen.generateContent({
+      contents: [{role: "user", parts: [{text: prompt}]}],
+    });
+    response.status(200).json({image});
+  } catch (error) {
+    response.status(500).json({error: error});
   }
 });

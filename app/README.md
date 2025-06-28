@@ -73,3 +73,22 @@ bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+# docker compose 
+```
+docker compose exec function bash
+```
+
+# login
+```
+firebase login --no-localhost
+```
+
+# deploy function
+```
+firebase deploy --only functions
+```
+
+```
+firebase emulators:start --only functions
+```

@@ -16,6 +16,9 @@ services:
     volumes:
       - ./function:/app
     tty: true
+    ports:
+      - "5001:5001"
+      - "4000:4000"
 #     networks:
 #       - cinnamon-network
 
