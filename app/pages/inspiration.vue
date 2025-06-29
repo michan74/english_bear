@@ -123,7 +123,7 @@ export default {
       }
     },
     shareToX() {
-      const text = encodeURIComponent(`${this.quote}\n- Bear Horizon\n\n#BearHorizon #英語学習 #英語勉強`)
+      const text = encodeURIComponent(`${this.quote}\n- Bear Horizon\n\n#BearHorizon #EnglishLearning #BearHorizon #くまくまEnglish`)
       const url = `https://twitter.com/intent/tweet?text=${text}`
       window.open(url, '_blank')
     }
