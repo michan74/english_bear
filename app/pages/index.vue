@@ -40,11 +40,11 @@
         </div>
         <div class="menu-text">Word List</div>
       </NuxtLink>
-      <NuxtLink to="/difficult-words" class="menu-card">
+      <NuxtLink to="/inspiration" class="menu-card">
         <div class="menu-icon">
           <v-icon size="32" color="primary">mdi-lightbulb-outline</v-icon>
         </div>
-        <div class="menu-text">Inspirations</div>
+        <div class="menu-text">Inspiration</div>
         <div class="badge">5</div>
       </NuxtLink>
     </div>

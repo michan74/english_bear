@@ -18,6 +18,7 @@ export default defineNuxtConfig({
       cloudFunctionImageUrl: process.env.CLOUD_FUNCTION_IMAGE_URL,
       cloudFunctionImageWithOpenAIUrl: process.env.CLOUD_FUNCTION_IMAGE_WITH_OPENAI_URL,
       cloudFunctionAudioUrl: process.env.CLOUD_FUNCTION_AUDIO_URL, // 音声合成用のCloud FunctionのURL
+      cloudFunctionQuoteUrl: process.env.CLOUD_FUNCTION_QUOTE_URL, // インスピレーション用のCloud FunctionのURL
     },
   },
   build: {

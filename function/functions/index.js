@@ -39,7 +39,8 @@ const OPENAI_API_URL = "https://api.openai.com/v1/images/generations";
 // eslint-disable-next-line require-jsdoc
 function withCors(handler) {
   return (req, res) => {
-    res.set("Access-Control-Allow-Origin", "*");
+    // Cloudflare Pagesのローカル開発環境からのアクセスを許可
+    res.set("Access-Control-Allow-Origin", "http://localhost:3000");
     res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     if (req.method === "OPTIONS") {
@@ -235,5 +236,38 @@ exports.generateSpeech = onRequest(withCors(async (request, response) => {
       error: "Failed to generate speech",
       details: error.message,
     });
+  }
+}));
+
+/**
+ * くまの名言を生成するCloud Function
+ */
+exports.generateQuote = onRequest(withCors(async (request, response) => {
+  const prompt = [
+    `You are a gentle bear sharing encouraging thoughts with English learners.`,
+    `Please generate a motivational message for someone learning English,`,
+    `written from the perspective of a bear. The tone should be soft, kind, and uplifting — like a comforting quote.`,
+    `Limit the message to 20 words or fewer.`,
+    `Return only the quote, with no attribution or name.`,
+  ].join(" ");
+  try {
+    const gemini = vertexAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        temperature: 0.8,
+        topK: 40,
+        topP: 1,
+        maxOutputTokens: 100,
+      },
+      safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
+    });
+    const result = await gemini.generateContent({
+      contents: [{role: "user", parts: [{text: prompt}]}],
+    });
+    const generatedText = result.response.candidates[0].content.parts[0].text;
+    response.status(200).json({quote: generatedText});
+  } catch (error) {
+    logger.error("Error generating content:", error, {structuredData: true});
+    response.status(500).json({error: error});
   }
 }));
