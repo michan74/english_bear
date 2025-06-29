@@ -50,7 +50,7 @@
       </template>
     </v-snackbar>
 
-    <div class="page-header text-center mb-6 mt-15">
+    <div class="page-header text-center mb-6">
       <h2>Add Card</h2>
       <p class="text-subtitle-1 text-medium-emphasis">Create a new flashcard with AI-powered visuals</p>
     </div>
@@ -136,9 +136,10 @@
           <v-img
             v-else-if="generatedImageUrl"
             :src="generatedImageUrl"
-            height="240"
+            :width="320"
+            :height="320"
             cover
-            class="bg-grey-lighten-2 rounded-lg"
+            class="bg-grey-lighten-2 rounded-lg mx-auto"
           >
             <template v-slot:placeholder>
               <v-row class="fill-height ma-0" align="center" justify="center">
@@ -163,14 +164,14 @@
           </v-btn>
 
           <v-btn
-            color="blue-lighten-4"
+            color="primary"
             @click="resetForm"
             block
-            variant="flat"
+            variant="outlined"
             class="retry-button"
           >
-            <v-icon left class="text-blue-darken-1">mdi-refresh</v-icon>
-            <span class="text-blue-darken-1">Generate Another</span>
+            <v-icon left class="text-primary">mdi-refresh</v-icon>
+            <span class="text-primary">Generate Another Card</span>
           </v-btn>
         </div>
       </div>
@@ -463,12 +464,14 @@ h2 {
 }
 
 .image-loading-container {
-  height: 240px;
+  width: 320px;
+  height: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: rgb(var(--v-theme-secondary));
   border-radius: 8px;
+  margin: 0 auto;
 }
 </style>

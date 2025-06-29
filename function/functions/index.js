@@ -54,28 +54,33 @@ function withCors(handler) {
  * 英単語のイラスト用プロンプトを生成するCloud Function
  */
 exports.generatePrompt = onRequest(withCors(async (request, response) => {
-  const word = request.query.word || "bear";
+  const word = request.query.word;
+
+  if (!word) {
+    response.status(400).json({error: "Word is required."});
+    return;
+  }
+
   const prompt = [
-    `You are an assistant that helps generate illustration prompts for English vocabulary learning.`,
-    `Given a single English word, your task is to return a JSON object with two fields:`,
+    `You are an assistant that generates illustration prompts for English vocabulary learning.`,
+    `Given a single English word, return a JSON object with two fields:`,
     // eslint-disable-next-line max-len
-    `1. "simple_definition": Describe the word's meaning using simple English (easy enough for a 6-year-old to understand).`,
-    `Keep it within 10 words. Use as few words as possible.`,
+    `1. "simple_definition": A short definition in simple English. Use no more than 10 words.`,
     // eslint-disable-next-line max-len
-    `2. "image_prompt": Describe a visual scene that could illustrate the meaning of the word. Be specific and concrete. Do not include the word itself in the description.`,
+    `2. "image_prompt": A specific and concrete description of a visual scene that illustrates the word’s meaning.`,
     // eslint-disable-next-line max-len
-    `If the input is not a valid English word, or if it is a non-English word, a made-up word, or a phrase (more than one word), return an error message in JSON like:`,
+    `If the input is not a valid English dictionary word, or if it is a non-English word, a made-up word, or a phrase (more than one word), return an error.`,
     `{"error": "Invalid input. Please enter a single valid English word."}`,
-    `Only return the JSON object. Do not include any explanation or formatting.`,
+    `Only return the JSON object without any explanation or formatting.`,
     `Word: "${word}"`].join(" ");
   try {
     const gemini = vertexAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.6,
         topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+        topP: 1,
+        maxOutputTokens: 1000,
       },
       safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
     });
@@ -101,11 +106,24 @@ exports.generateImage = onRequest(withCors(async (request, response) => {
     response.status(400).json({error: "Prompt is required."});
     return;
   }
+
+  // くまのイラスト用プロンプトを生成
+  const basePrompt = [
+    `A simple flat-style vector illustration of a cute brown bear acting out the meaning of the word.`,
+    `The bear is the main character and clearly shows the concept through its actions or situation.`,
+    `The bear has a thick black outline, soft colors, and a friendly expression.`,
+    // eslint-disable-next-line max-len
+    `The background is pastel or beige, and the illustration is minimalist and child-friendly, like an educational flashcard.`,
+    `Do not include any text or writing anywhere in the image.`,
+  ].join(" ");
+
+  const fullPrompt = `${basePrompt} Scene: ${prompt}`;
+
   try {
     const imagen = vertexAI.getGenerativeModel({
       model: "imagen-3.0-generate-002",
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.6,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 1024,
@@ -113,7 +131,7 @@ exports.generateImage = onRequest(withCors(async (request, response) => {
       safetySettings: [{category: "HARM_CATEGORY_HARASSMENT", threshold: 3}],
     });
     const image = await imagen.generateContent({
-      contents: [{role: "user", parts: [{text: prompt}]}],
+      contents: [{role: "user", parts: [{text: fullPrompt}]}],
     });
     response.status(200).json({image});
   } catch (error) {
@@ -131,6 +149,19 @@ exports.generateImageWithOpenAI = onRequest(withCors(async (request, response) =
     if (!prompt) {
       throw new Error("Prompt is required");
     }
+
+    // くまのイラスト用プロンプトを生成
+    const basePrompt = [
+      `Create a simple flat-style vector illustration.`,
+      // eslint-disable-next-line max-len
+      `If the prompt includes human characters, replace humans with a bear character`,
+      // eslint-disable-next-line max-len
+      `The illustration should be child-friendly, minimalist. Use a pastel or beige background.`,
+      `Do not include any text or writing anywhere in the image.`,
+    ].join(" ");
+
+    const fullPrompt = `${basePrompt} Scene: ${prompt}`;
+
     const openAIResponse = await fetch(OPENAI_API_URL, {
       method: "POST",
       headers: {
@@ -139,11 +170,11 @@ exports.generateImageWithOpenAI = onRequest(withCors(async (request, response) =
         "OpenAI-Organization": OPENAI_ORG_ID,
       },
       body: JSON.stringify({
-        prompt: prompt,
+        prompt: fullPrompt,
         n: 1,
-        size: "1024x1024",
+        size: "512x512",
         response_format: "b64_json",
-        model: "dall-e-3",
+        model: "dall-e-2",
       }),
     });
     if (!openAIResponse.ok) {
