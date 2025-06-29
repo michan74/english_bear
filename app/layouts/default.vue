@@ -22,6 +22,12 @@
           </v-btn>
           <span class="footer-text mt-n2">HOME</span>
         </NuxtLink>
+        <NuxtLink to="/word-register" class="text-decoration-none">
+          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
+            <v-icon color="primary" size="38">mdi-pencil-plus</v-icon>
+          </v-btn>
+          <span class="footer-text mt-n2">ADD</span>
+        </NuxtLink>
         <NuxtLink to="/flashcard" class="text-decoration-none">
           <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
             <v-icon color="primary" size="38">mdi-cards-outline</v-icon>
@@ -33,12 +39,6 @@
             <v-icon color="primary" size="38">mdi-notebook</v-icon>
           </v-btn>
           <span class="footer-text mt-n2">WORD LIST</span>
-        </NuxtLink>
-        <NuxtLink to="/word-register" class="text-decoration-none">
-          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
-            <v-icon color="primary" size="38">mdi-plus</v-icon>
-          </v-btn>
-          <span class="footer-text mt-n2">ADD</span>
         </NuxtLink>
       </div>
     </v-footer>

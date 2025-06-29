@@ -63,5 +63,10 @@ export const useWords = () => {
     }
   };
 
-  return { addWord, getWords, deleteWord }
+  const getWordCount = async () => {
+    const words = await getWords();
+    return words.length;
+  };
+
+  return { addWord, getWords, deleteWord, getWordCount }
 }
