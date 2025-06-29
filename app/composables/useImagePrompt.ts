@@ -1,8 +1,7 @@
 // composables/useImagePrompt.ts
 export async function usePromptGenerate(word: string) {
   const config = useRuntimeConfig();
-  const isEmulator = process.env.NODE_ENV === "development";
-  const endpoint = `${isEmulator ? "http://" : "https://"}${config.public.cloudFunctionPromptUrl}?word=${encodeURIComponent(word)}`;
+  const endpoint = `${config.public.cloudFunctionPromptUrl}?word=${encodeURIComponent(word)}`;
 
   try {
     console.log("Calling endpoint:", endpoint);
@@ -37,8 +36,7 @@ export async function usePromptGenerate(word: string) {
 // Vertex AI Imagen用の画像生成（既存の関数）
 export async function useImageGenerate(prompt: string) {
   const config = useRuntimeConfig();
-  const isEmulator = process.env.NODE_ENV === "development";
-  const endpoint = `${isEmulator ? "http://" : "https://"}${config.public.cloudFunctionImageUrl}`;
+  const endpoint = config.public.cloudFunctionImageUrl;
 
   try {
     console.log("Calling Vertex AI image endpoint:", endpoint);
@@ -76,8 +74,7 @@ export async function useImageGenerate(prompt: string) {
 // OpenAI DALL-E用の画像生成（新規追加）
 export async function useImageGenerateWithOpenAI(prompt: string) {
   const config = useRuntimeConfig();
-  const isEmulator = process.env.NODE_ENV === "development";
-  const endpoint = `${isEmulator ? "http://" : "https://"}${config.public.cloudFunctionImageWithOpenAIUrl}`;
+  const endpoint = config.public.cloudFunctionImageWithOpenAIUrl;
 
   try {
     console.log("Calling OpenAI image endpoint:", endpoint);

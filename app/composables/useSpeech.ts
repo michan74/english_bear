@@ -4,12 +4,11 @@ import { useRuntimeConfig } from '#app'
 export const useSpeech = () => {
   const config = useRuntimeConfig()
   const generatingSpeech = ref(false)
-  const isEmulator = process.env.NODE_ENV === 'development'
 
   const generateSpeech = async (text: string) => {
     try {
       generatingSpeech.value = true
-      const endpoint = `${isEmulator ? 'http://' : 'https://'}${config.public.cloudFunctionAudioUrl}`
+      const endpoint = config.public.cloudFunctionAudioUrl;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

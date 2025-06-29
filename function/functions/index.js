@@ -40,7 +40,7 @@ const OPENAI_API_URL = "https://api.openai.com/v1/images/generations";
 function withCors(handler) {
   return (req, res) => {
     // Cloudflare Pagesのローカル開発環境からのアクセスを許可
-    res.set("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.set("Access-Control-Allow-Origin", ["http://localhost:3000", "https://aihackathon2-463515.web.app"]);
     res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     if (req.method === "OPTIONS") {
