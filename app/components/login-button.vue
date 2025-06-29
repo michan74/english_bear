@@ -3,7 +3,8 @@
     <div v-if="!user">
       <v-btn
         class="login-button"
-        color="black"
+        color="primary"
+        variant="flat"
         @click="signInWithGoogle"
       >
         Log in
