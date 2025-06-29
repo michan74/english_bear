@@ -1,6 +1,6 @@
 <template>
   <div class="login-bg">
-    <div class="login-box">
+    <!-- <div class="login-box">
       <h2>Login</h2>
       <button class="gsi-material-button" @click="signInWithGoogle">
         <div class="gsi-material-button-state"></div>
@@ -18,7 +18,7 @@
           <span style="display: none;">Sign in with Google</span>
         </div>
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 
