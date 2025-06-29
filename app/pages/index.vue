@@ -45,7 +45,6 @@
           <v-icon size="32" color="primary">mdi-lightbulb-outline</v-icon>
         </div>
         <div class="menu-text">Inspiration</div>
-        <div class="badge">5</div>
       </NuxtLink>
     </div>
   </v-container>
