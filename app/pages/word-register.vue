@@ -28,20 +28,20 @@
     <!-- Success Snackbar -->
     <v-snackbar
       v-model="showSuccessMessage"
-      color="blue-lighten-4"
+      color="secondary"
       location="top"
       :timeout="3000"
       elevation="0"
       rounded="lg"
     >
       <div class="d-flex align-center">
-        <v-icon class="mr-2" color="blue-darken-1">mdi-check-circle</v-icon>
-        <span class="text-blue-darken-1">{{ successMessage }}</span>
+        <v-icon class="mr-2" color="secondary">mdi-check-circle</v-icon>
+        <span class="text-primary">{{ successMessage }}</span>
       </div>
       
       <template v-slot:actions>
         <v-btn
-          color="blue-darken-1"
+          color="primary"
           variant="text"
           @click="showSuccessMessage = false"
         >
@@ -109,6 +109,20 @@
         <v-textarea
           v-model="meaning"
           label="Definition"
+          readonly
+          class="form-field mb-4"
+          variant="outlined"
+          auto-grow
+          rows="2"
+          :hide-details="true"
+          density="comfortable"
+        />
+
+        <!-- Example Sentence Display -->
+        <v-textarea
+          v-if="exampleSentence"
+          v-model="exampleSentence"
+          label="Example"
           readonly
           class="form-field mb-4"
           variant="outlined"
@@ -192,7 +206,7 @@ export default {
     return {
       word: "",
       meaning: "",
-      example: "",
+      exampleSentence: "",
       loading: false,
       generating: false,
       imageFile: null,
@@ -232,6 +246,11 @@ export default {
           this.meaning = data.simple_definition;
         } else {
           throw new Error("No meaning received");
+        }
+
+        // 例文の設定
+        if (data.example_sentence) {
+          this.exampleSentence = data.example_sentence;
         }
         
         // OpenAIで画像生成
@@ -305,11 +324,18 @@ export default {
 
         // FirestoreにURLを保存
         const { addWord } = useWords();
-        await addWord(this.word, this.meaning, imageUrl, audioUrl);
+        await addWord(
+          this.word,
+          this.meaning,
+          imageUrl,
+          audioUrl,
+          this.exampleSentence,
+        );
 
         // 成功したらフォームをクリア
         this.word = "";
         this.meaning = "";
+        this.exampleSentence = "";
         this.imageFile = null;
         this.generatedImageUrl = null;
         this.audioFile = null;
@@ -330,6 +356,7 @@ export default {
     resetForm() {
       this.word = "";
       this.meaning = "";
+      this.exampleSentence = "";
       this.imageFile = null;
       this.generatedImageUrl = null;
     },

@@ -68,6 +68,7 @@ exports.generatePrompt = onRequest(withCors(async (request, response) => {
     `1. "simple_definition": A short definition in simple English. Use no more than 10 words.`,
     // eslint-disable-next-line max-len
     `2. "image_prompt": A specific and concrete description of a visual scene that illustrates the word’s meaning.`,
+    `3. "example_sentence": A simple sentence using the word in context.`,
     // eslint-disable-next-line max-len
     `If the input is not a valid English dictionary word, or if it is a non-English word, a made-up word, or a phrase (more than one word), return an error.`,
     `{"error": "Invalid input. Please enter a single valid English word."}`,

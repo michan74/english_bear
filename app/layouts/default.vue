@@ -4,7 +4,7 @@
       <LoginButton />
     </div>
     
-    <v-main class="pa-0" style="overflow:auto; min-height:0;">
+    <v-main class="pa-0 mb-15" style="overflow:auto; min-height:0;">
       <NuxtPage />
     </v-main>
     
