@@ -47,8 +47,17 @@
             </div>
           </div>
           <v-card-text>
-            <p><strong>Meaning:</strong> {{ word.meaning }}</p>
-            <p v-if="word.exampleSentence"><strong>Example:</strong> {{ word.exampleSentence }}</p>
+            <div class="meaning-text mb-2">{{ word.meaning }}</div>
+            <div v-if="word.exampleSentence" class="d-flex align-center example-section">
+              <v-icon
+                size="small"
+                color="grey-darken-1"
+                class="me-2"
+              >
+                mdi-format-quote-open
+              </v-icon>
+              <div class="example-text">{{ word.exampleSentence }}</div>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -187,6 +196,22 @@ export default {
 
 .v-card-text {
   padding: 16px;
+}
+
+.meaning-text {
+  color: #2d3436;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.example-section {
+  color: #636e72;
+}
+
+.example-text {
+  font-style: italic;
+  line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 .gap-2 {
