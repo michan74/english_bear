@@ -1,5 +1,6 @@
 // composables/useWords.ts
-import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { deleteObject, getStorage, ref } from 'firebase/storage';
 
 export const useWords = () => {
   const { $firebase } = useNuxtApp();
@@ -29,5 +30,38 @@ export const useWords = () => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
   }
 
-  return { addWord, getWords }
+  const deleteWord = async (wordId: string, imageUrl: string, audioUrl: string) => {
+    const { $firebase } = useNuxtApp();
+    const user = $firebase.auth.currentUser;
+
+    if (!user) {
+      throw new Error("User not logged in");
+    }
+
+    try {
+      // Firestoreからドキュメントを削除
+      const wordRef = doc($firebase.db, "users", user.uid, "words", wordId);
+      await deleteDoc(wordRef);
+
+      // Storageから画像と音声を削除
+      const storage = getStorage();
+      if (imageUrl) {
+        const imageRef = ref(storage, imageUrl);
+        await deleteObject(imageRef).catch(error => {
+          console.error("Error deleting image:", error);
+        });
+      }
+      if (audioUrl) {
+        const audioRef = ref(storage, audioUrl);
+        await deleteObject(audioRef).catch(error => {
+          console.error("Error deleting audio:", error);
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting word:", error);
+      throw error;
+    }
+  };
+
+  return { addWord, getWords, deleteWord }
 }

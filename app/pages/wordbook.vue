@@ -11,43 +11,85 @@
         <v-card class="word-card mx-auto">
           <div class="word-header">
             <h3 class="text-h6 word-text">{{ word.word }}</h3>
-            <v-btn
-              v-if="word.audioUrl"
-              icon="mdi-volume-high"
-              size="small"
-              color="accent"
-              variant="plain"
-              @click="playAudio(word.audioUrl)"
-            >
-              <v-icon>mdi-volume-high</v-icon>
-              <v-tooltip
-                activator="parent"
-                location="top"
+            <div class="d-flex align-center gap-2">
+              <v-btn
+                v-if="word.audioUrl"
+                icon="mdi-volume-high"
+                size="small"
+                color="white"
+                variant="plain"
+                @click.stop="playAudio(word.audioUrl)"
               >
-                Play audio
-              </v-tooltip>
-            </v-btn>
-          </div>
- 
-          <div class="word-content">
-            <div class="meaning-section">
-              <div class="section-label">Definition</div>
-              <div class="text-body-1 meaning-text">{{ word.meaning }}</div>
+                <v-icon>mdi-volume-high</v-icon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  Play audio
+                </v-tooltip>
+              </v-btn>
+              <v-btn
+                icon="mdi-delete-outline"
+                size="small"
+                color="white"
+                variant="plain"
+                class="delete-btn"
+                @click.stop="confirmDelete(word)"
+              >
+                <v-icon>mdi-delete-outline</v-icon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  Delete card
+                </v-tooltip>
+              </v-btn>
             </div>
-
-            <div v-if="word.exampleSentence" class="example-section mt-4">
-              <div class="section-label">Example</div>
-              <div class="text-body-2 example-text">{{ word.exampleSentence }}</div>
-            </div>
           </div>
+          <v-card-text>
+            <p><strong>Meaning:</strong> {{ word.meaning }}</p>
+            <p v-if="word.exampleSentence"><strong>Example:</strong> {{ word.exampleSentence }}</p>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-alert type="info" v-if="loading" class="mt-4">読み込み中...</v-alert>
     <v-alert type="warning" v-if="!loading && words.length === 0" class="mt-4">
-      まだ単語が登録されていません
+      You haven't added any words yet.
     </v-alert>
+
+    <!-- 削除確認ダイアログ -->
+    <v-dialog v-model="showDeleteDialog" max-width="400">
+      <v-card>
+        <v-card-title class="text-h6 pa-4 text-pink-lighten-1">
+          Delete Card
+        </v-card-title>
+        <v-card-text class="pa-4 text-grey-darken-1">
+          Are you sure you want to delete "<span class="font-weight-bold text-pink-darken-1">{{ wordToDelete?.word }}</span>"?
+          This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn
+            color="grey"
+            variant="flat"
+            @click="showDeleteDialog = false"
+            :disabled="deleteLoading"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="pink-lighten-4"
+            variant="flat"
+            @click="deleteWord"
+            :loading="deleteLoading"
+            class="delete-confirm-btn"
+          >
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -56,11 +98,14 @@ import { useWords } from '~/composables/useWords'
 import { useSpeech } from '~/composables/useSpeech'
 
 export default {
-  name: 'WordCardList',
+  name: 'WordbookPage',
   data() {
     return {
       words: [],
       loading: true,
+      showDeleteDialog: false,
+      wordToDelete: null,
+      deleteLoading: false,
     }
   },
   methods: {
@@ -69,15 +114,41 @@ export default {
         const { playAudio } = useSpeech()
         playAudio(audioUrl)
       }
+    },
+    confirmDelete(word) {
+      this.wordToDelete = word;
+      this.showDeleteDialog = true;
+    },
+    async deleteWord() {
+      if (!this.wordToDelete) return;
+      
+      this.deleteLoading = true;
+      try {
+        const { deleteWord } = useWords();
+        await deleteWord(
+          this.wordToDelete.id,
+          this.wordToDelete.imageUrl,
+          this.wordToDelete.audioUrl
+        );
+        
+        // 成功したら配列から削除
+        this.words = this.words.filter(w => w.id !== this.wordToDelete.id);
+        this.showDeleteDialog = false;
+        this.wordToDelete = null;
+      } catch (error) {
+        console.error('Error deleting word:', error);
+        alert('Failed to delete the word. Please try again.');
+      } finally {
+        this.deleteLoading = false;
+      }
     }
   },
   async mounted() {
     const { getWords } = useWords()
     try {
       this.words = await getWords()
-    } catch (e) {
-      alert('単語の取得に失敗しました')
-      console.error(e)
+    } catch (error) {
+      console.error('Error fetching words:', error)
     } finally {
       this.loading = false
     }
@@ -86,18 +157,6 @@ export default {
 </script>
 
 <style scoped>
-.word-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  overflow: hidden;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  }
-}
-
 .word-header {
   background-color: rgb(var(--v-theme-primary));
   color: white;
@@ -126,14 +185,26 @@ export default {
   margin-bottom: 4px;
 }
 
-.meaning-text {
-  color: #2d3436;
-  line-height: 1.5;
+.v-card-text {
+  padding: 16px;
 }
 
-.example-text {
-  color: #636e72;
-  line-height: 1.6;
-  font-style: italic;
+.gap-2 {
+  gap: 8px;
+}
+
+.delete-btn {
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.delete-confirm-btn {
+  color: rgb(var(--v-theme-error)) !important;
+  font-weight: 500;
 }
 </style>
