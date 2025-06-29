@@ -11,28 +11,34 @@
     <!-- footer -->
     <v-footer
       app
-      class="text-center d-flex flex-column pb-2 pt-1 footer-custom bg-secondary"
-      style="border-top: 1px solid rgb(var(--v-theme-primary)); box-shadow: 0 -2px 8px rgba(var(--v-theme-primary), 0.1); z-index: 10; min-height: 70px;"
-      height="auto"
+      class="text-center d-flex flex-column footer-custom bg-secondary px-2"
+      style="border-top: 1px solid rgb(var(--v-theme-primary)); box-shadow: 0 -2px 8px rgba(var(--v-theme-primary), 0.1); z-index: 10; height: 72px;"
+      height="72"
     >
-      <div class="d-flex justify-center align-center" style="height:60px;">
-        <NuxtLink to="/" class="flex-grow-1 text-center" style="text-decoration:none;">
-          <v-btn variant="text" class="d-flex flex-column align-center mx-2 footer-btn" style="min-width:0;">
-            <v-icon color="primary" size="28">mdi-home-heart</v-icon>
-            <span class="footer-text">Home</span>
+      <div class="d-flex justify-space-between align-center" style="height: 100%; width: 100%; max-width: 600px; margin: 0 auto;">
+        <NuxtLink to="/" class="text-decoration-none">
+          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
+            <v-icon color="primary" size="34">mdi-home-heart</v-icon>
           </v-btn>
+          <span class="footer-text mt-n2">HOME</span>
         </NuxtLink>
-        <NuxtLink to="/flashcard" class="flex-grow-1 text-center" style="text-decoration:none;">
-          <v-btn variant="text" class="d-flex flex-column align-center mx-2 footer-btn" style="min-width:0;">
-            <v-icon color="primary" size="28">mdi-check</v-icon>
-            <span class="footer-text">Study</span>
+        <NuxtLink to="/flashcard" class="text-decoration-none">
+          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
+            <v-icon color="primary" size="38">mdi-cards-outline</v-icon>
           </v-btn>
+          <span class="footer-text mt-n2">FLASHCARDS</span>
         </NuxtLink>
-        <NuxtLink to="/word-register" class="flex-grow-1 text-center" style="text-decoration:none;">
-          <v-btn variant="text" class="d-flex flex-column align-center mx-2 footer-btn" style="min-width:0;">
-            <v-icon color="primary" size="28">mdi-plus</v-icon>
-            <span class="footer-text">Add</span>
+        <NuxtLink to="/wordbook" class="text-decoration-none">
+          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
+            <v-icon color="primary" size="38">mdi-notebook</v-icon>
           </v-btn>
+          <span class="footer-text mt-n2">WORD LIST</span>
+        </NuxtLink>
+        <NuxtLink to="/word-register" class="text-decoration-none">
+          <v-btn variant="text" class="footer-btn px-2" style="min-width: 72px; height: 56px;">
+            <v-icon color="primary" size="38">mdi-plus</v-icon>
+          </v-btn>
+          <span class="footer-text mt-n2">ADD</span>
         </NuxtLink>
       </div>
     </v-footer>
@@ -51,11 +57,16 @@ html, body, #__nuxt, #app {
 }
 
 .footer-text {
-  font-size: 13px;
+  font-size: 10px;
   color: rgb(var(--v-theme-primary));
   transition: color 0.3s ease;
   opacity: 0.95;
-  font-weight: 500;
+  font-weight: 600;
+  white-space: nowrap;
+  display: block;
+  text-align: center;
+  margin-top: -4px;
+  letter-spacing: 0.5px;
 }
 
 .footer-btn {
